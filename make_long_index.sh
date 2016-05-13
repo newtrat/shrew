@@ -1,4 +1,10 @@
 #!/bin/bash
+if [ $# -ne 1 ]
+then
+echo "Missing filesize argument (size of file in kilobytes)"
+exit 1
+fi
+
 if [ -f index.html ]
 then
   rm index.html
