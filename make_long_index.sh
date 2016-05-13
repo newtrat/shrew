@@ -1,21 +1,23 @@
 #!/bin/bash
+FILENAME=index001.html
+
 if [ $# -ne 1 ]
 then
 echo "Missing filesize argument (size of file in kilobytes)"
 exit 1
 fi
 
-if [ -f index.html ]
+if [ -f $FILENAME ]
 then
-  rm index.html
+  rm $FILENAME
 fi
-touch index.html
+touch $FILENAME
 
 # The argument gives the number of kilobytes to add
 iters=$(($1*20))
 for (( i=0; i<$iters; i++))
 do
-  echo "<!--This is a comment to make the file longer.-->" >> index.html
+  echo "<!--This is a comment to make the file longer.-->" >> $FILENAME
 done
 
-mv -f index.html /var/www/html/index.html
+mv -f $FILENAME /var/www/html/index.html
