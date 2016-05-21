@@ -1,5 +1,5 @@
 #!/bin/bash
-HOST="10.0.2.15"
+HOST=$MAHIMAHI_BASE
 UDP_PORT=1234
 
 # Payload for a full-length, 1500 byte packet assuming IP header is 20 bytes and UDP header is 8 bytes
@@ -12,13 +12,13 @@ done
 # width of square, given in milliseconds
 WAVE_WIDTH=100
 # LINE_RATE is given in packets per millisecond
-LINE_RATE=125
+LINE_RATE=12
 
 # Delay between squares, in milliseconds
-DELAY=900
+DELAY=100
 
 # Number repetitions
-NUM_REPS=10
+NUM_REPS=300
 
 for ((i=0; i<$NUM_REPS; i++))
 do
@@ -28,5 +28,6 @@ do
 	do
 		echo -n $FULL_PACKET > /dev/udp/$HOST/$UDP_PORT
 	done
-	sleep 0.9
+	#sleep 0.1
+	echo "$i of $NUM_REPS"
 done
