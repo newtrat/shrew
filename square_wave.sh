@@ -1,6 +1,6 @@
 #!/bin/bash
 HOST=$MAHIMAHI_BASE
-UDP_PORT=1234
+UDP_PORT=42000
 
 # Payload for a full-length, 1500 byte packet assuming IP header is 20 bytes and UDP header is 8 bytes
 FULL_PACKET=""
@@ -28,6 +28,6 @@ do
 	do
 		echo -n $FULL_PACKET > /dev/udp/$HOST/$UDP_PORT
 	done
-	#sleep 0.1
+	sleep 0.49
 	echo "$i of $NUM_REPS"
 done
