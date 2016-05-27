@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 	
 	int friend_sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	
-	char message[736];
+	char message[1472];
 	for (int i = 0; i < sizeof(message); i++) {
 		message[i] = 'h';
 	}
@@ -69,9 +69,9 @@ int main(int argc, char* argv[]) {
 
 	bind(friend_sock, (struct sockaddr*) &my_addr, sizeof(my_addr));
 
-	for (int i = 0; i < 200; i++) {
+	for (int i = 0; i < 1000; i++) {
 		printf("Starting to send packets %d\n", i);
-		for (int j = 0; j < 5000; j++) {
+		for (int j = 0; j < 18; j++) {
 			int sockfd = 0;
 			//char message[736] = "Testing.......";
 			
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 		//sleep(1);
 		struct timespec sleeptime;
 		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = 500000000L;
+		sleeptime.tv_nsec = 100000000L;
 		int result = nanosleep(&sleeptime, NULL);
 	}
 
