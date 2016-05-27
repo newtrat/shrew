@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define PORT 42000
+
 /**
  * Waits to receive a datagram indicating that the attack
  * should start.
@@ -22,7 +24,7 @@ struct sockaddr_in waitForStartSignal() {
 	struct sockaddr_in server_addr = {};
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(4444);
+	server_addr.sin_port = htons(PORT);
 	if (bind(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
 		error(1, 0, "Error on binding\n");
 	}
@@ -58,8 +60,15 @@ int main(int argc, char* argv[]) {
 		message[i] = 'h';
 	}
 
-	for (int i = 0; i < 1000; i++) {
-		for (int j = 0; j < 500; j++) {
+	struct sockaddr_in my_addr;
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_port = htons(PORT);
+	my_addr.sin_addr.s_addr = INADDR_ANY;
+
+	bind(friend_sock, (struct sockaddr*) &my_addr, sizeof(my_addr));
+
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 50; j++) {
 			int sockfd = 0;
 			//char message[736] = "Testing.......";
 			
