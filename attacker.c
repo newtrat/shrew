@@ -12,7 +12,7 @@
  * @return socket file descriptor connected to attacker's friend
  *         if no errors occur
  */
-int waitForStartSignal() {
+struct sockaddr_in waitForStartSignal() {
 	int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
 	if (sockfd < 0) {
 		error(1, 0, "Error opening socket.\n");
@@ -31,24 +31,34 @@ int waitForStartSignal() {
 
 	struct sockaddr_in cli_addr;
 	int clilen = sizeof(cli_addr);
-	int clisockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-	printf("Accepted connection.\n");
-	if (clisockfd < 0) {
-		error(1, 0, "Error on accept");
+	char packet_buf[1500];
+
+	// Receive a single message
+	ssize_t bytes = recvfrom(sockfd, packet_buf, sizeof(packet_buf), 0, 
+													 (struct sockaddr *) &cli_addr, &clilen);
+
+	if (bytes < 0) {
+		error(1, 0, "Error receiving packet.");
 	}
+	
+	printf("Received a packet on port: %d and addr %d\n", ntohs(cli_addr.sin_port), cli_addr.sin_addr.s_addr);
 
 	close(sockfd);
-	return clisockfd;
+	return cli_addr;
 }
 
 int main(int argc, char* argv[]) {
-	int sockfd = waitForStartSignal();
+	struct sockaddr_in friend_addr = waitForStartSignal();
+	
+	int friend_sock = socket(PF_INET, SOCK_DGRAM, 0);
+	
 	for (int i = 0; i < 100; i++) {
+		int sockfd = 0;
 		char* message = "Testing";
-		ssize_t n = write(sockfd, message, strlen(message) + 1);
+		ssize_t n = sendto(friend_sock, message, strlen(message) + 1, 0, 
+		                    (struct sockaddr *) &friend_addr, sizeof(friend_addr));
 		if (n < 0) {
 			error(1, 0, "Error writing to socket");
 		}
 	}
-	close(sockfd);
 }
