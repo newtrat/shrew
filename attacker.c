@@ -1,11 +1,13 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <error.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #define PORT 42000
 
@@ -67,8 +69,9 @@ int main(int argc, char* argv[]) {
 
 	bind(friend_sock, (struct sockaddr*) &my_addr, sizeof(my_addr));
 
-	for (int i = 0; i < 100; i++) {
-		for (int j = 0; j < 50; j++) {
+	for (int i = 0; i < 200; i++) {
+		printf("Starting to send packets %d\n", i);
+		for (int j = 0; j < 5000; j++) {
 			int sockfd = 0;
 			//char message[736] = "Testing.......";
 			
@@ -78,6 +81,12 @@ int main(int argc, char* argv[]) {
 				error(1, 0, "Error writing to socket");
 			}
 		}
-		sleep(1);
+		printf("Done sending packets %d\n", i);
+		//sleep(1);
+		struct timespec sleeptime;
+		sleeptime.tv_sec = 0;
+		sleeptime.tv_nsec = 500000000L;
+		int result = nanosleep(&sleeptime, NULL);
 	}
+
 }
