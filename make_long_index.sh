@@ -3,7 +3,7 @@ FILENAME=/var/www/html/index.html
 
 if [ $# -ne 1 ]
 then
-echo "Missing filesize argument (size of file in thousands of bytes)"
+echo "Missing filesize argument (size of file in kilobytes)"
 exit 1
 fi
 
@@ -13,9 +13,13 @@ then
 fi
 touch $FILENAME
 
-# The argument gives the number of kilobytes to add
-iters=$(($1*20))
-for (( i=0; i<$iters; i++))
+for (( i=0; i<$1; i++))
 do
-  echo "<!--This is a comment to make the file longer.-->" >> $FILENAME
+  for (( j=0; j<20; j++))
+  do
+  	# 50 chars incl. newline
+    echo "<!--This is a comment to make the file longer.-->" >> $FILENAME
+  done
+  # 24 chars incl. newline
+  echo "<!--Another comment.-->" >> $FILENAME
 done

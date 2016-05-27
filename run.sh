@@ -1,4 +1,7 @@
 #!/bin/bash
+# Parameters:
+INDEX_SIZE_MEGABITS=15
+INDEX_SIZE_KILOBYTES=$((INDEX_SIZE_MEGABITS*128))
 
 # Step -2: Install dependencies
 # echo 'Installing dependencies...'
@@ -19,7 +22,7 @@ chmod 775 ./make_long_index.sh
 # Step 1: Set up server and attacker
 # echo 'Starting server...'
 # service start apache2
-# ./make_long_index.sh 10000
+./make_long_index.sh $INDEX_SIZE_KILOBYTES
 # echo 'Starting attacker...'
 ./attacker &
 attacker_pid=$!
@@ -34,6 +37,8 @@ sudo -u cs244 mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
                                  --uplink-queue-args='bytes=22500' \
                                  --downlink-queue=droptail \
                                  --downlink-queue-args='bytes=22500' \
+                                 --meter-downlink \
+                                 --meter-downlink-delay \
                                  -- \
-  <<< '. client_and_friend.sh'
+  <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS"
 kill -9 $attacker_pid
