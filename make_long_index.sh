@@ -1,9 +1,9 @@
 #!/bin/bash
-FILENAME=index001.html
+FILENAME=/var/www/html/index.html
 
 if [ $# -ne 1 ]
 then
-echo "Missing filesize argument (size of file in kilobytes)"
+echo "Missing filesize argument (size of file in thousands of bytes)"
 exit 1
 fi
 
@@ -19,5 +19,3 @@ for (( i=0; i<$iters; i++))
 do
   echo "<!--This is a comment to make the file longer.-->" >> $FILENAME
 done
-
-mv -f $FILENAME /var/www/html/index.html
