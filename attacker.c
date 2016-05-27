@@ -80,12 +80,16 @@ int main(int argc, char* argv[]) {
 			if (n < 0) {
 				error(1, 0, "Error writing to socket");
 			}
+			struct timespec req;
+			req.tv_sec = 0;
+			req.tv_nsec = 150000000L / 18;
+			nanosleep(&req, NULL);
 		}
 		printf("Done sending packets %d\n", i);
 		//sleep(1);
 		struct timespec sleeptime;
 		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = 100000000L;
+		sleeptime.tv_nsec = 500000000L;
 		int result = nanosleep(&sleeptime, NULL);
 	}
 
