@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <error.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 /**
  * Waits to receive a datagram indicating that the attack
@@ -41,7 +42,7 @@ struct sockaddr_in waitForStartSignal() {
 		error(1, 0, "Error receiving packet.");
 	}
 	
-	printf("Received a packet on port: %d and addr %d\n", ntohs(cli_addr.sin_port), cli_addr.sin_addr.s_addr);
+	printf("Received a packet on port: %d and addr %s\n", ntohs(cli_addr.sin_port), inet_ntoa(cli_addr.sin_addr));
 
 	close(sockfd);
 	return cli_addr;
@@ -50,15 +51,24 @@ struct sockaddr_in waitForStartSignal() {
 int main(int argc, char* argv[]) {
 	struct sockaddr_in friend_addr = waitForStartSignal();
 	
-	int friend_sock = socket(PF_INET, SOCK_DGRAM, 0);
+	int friend_sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	
-	for (int i = 0; i < 100; i++) {
-		int sockfd = 0;
-		char* message = "Testing";
-		ssize_t n = sendto(friend_sock, message, strlen(message) + 1, 0, 
-		                    (struct sockaddr *) &friend_addr, sizeof(friend_addr));
-		if (n < 0) {
-			error(1, 0, "Error writing to socket");
+	char message[736];
+	for (int i = 0; i < sizeof(message); i++) {
+		message[i] = 'h';
+	}
+
+	for (int i = 0; i < 1000; i++) {
+		for (int j = 0; j < 500; j++) {
+			int sockfd = 0;
+			//char message[736] = "Testing.......";
+			
+			ssize_t n = sendto(friend_sock, message, sizeof(message), 0, 
+		  	                  (struct sockaddr *) &friend_addr, sizeof(friend_addr));
+			if (n < 0) {
+				error(1, 0, "Error writing to socket");
+			}
 		}
+		sleep(1);
 	}
 }
