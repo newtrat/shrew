@@ -40,7 +40,7 @@ class ShrewTopo(Topo):
 
 def main():
   os.system("sudo mn -c")
-  for burst_period in range(200, 2000, 50):
+  for burst_period in range(1000, 1001, 25):
     for burst_length in [150]:
       topo = ShrewTopo()
       net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink)
@@ -50,6 +50,11 @@ def main():
       client = net.get("client")
       server = net.get("server")
       server.cmd("python webserver/webserver.py &")
+      # Change TCP RTO on server.
+      # TODO: Make this work if "ip route" contains more than one line...
+      server.cmd("ip route > /tmp/ip_routes.txt")
+      server.cmd("ip route change `cat /tmp/ip_routes.txt` rto_min 1000")
+      server.cmd("ip route flush cache")
       sleep(1)
 
       # Start up attacker
