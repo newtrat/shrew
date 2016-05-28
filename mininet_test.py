@@ -120,12 +120,13 @@ def main(args):
             attacker_friend.cmd("echo -n 'Hello, Shrew!' > /dev/udp/" + \
                                 attacker.IP() + "/42000 &")
 
+
             proc = client.popen("curl -o /dev/null -s -w %{time_total} " + \
                                 server.IP() + "/webserver/index.html", \
                                 shell=True)
             (stdoutdata, stderrdata) = proc.communicate()
             burst_outfile.write("%d %d\n" % (burst_period, burst_length))
-            throughput_outfile.write("%s\n" % (stdoutdata))
+            throughput_outfile.write("%f\n" % (float(args.file_size_megabits) / float(stdoutdata)))
 
             net.stop()
             # Ensure that all processes you create within Mininet are killed.
