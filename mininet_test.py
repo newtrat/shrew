@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from mininet.topo import Topo
 from mininet.node import CPULimitedHost
+from mininet.node import OVSController
 from mininet.link import TCLink
 from mininet.net import Mininet
 from mininet.log import lg, info
@@ -43,7 +44,8 @@ def main():
   for burst_period in [1100]:
     for burst_length in [150]:
       topo = ShrewTopo()
-      net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink)
+      net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, \
+                    controller=OVSController)
       net.start()
 
       # Start up server
@@ -63,9 +65,11 @@ def main():
       attacker_friend = net.get("friend")
       attacker.cmd("./attacker %d %d &" % (burst_period, burst_length))
       sleep(1)
-      attacker_friend.cmd("echo -n 'Hello, Shrew!' > /dev/udp/" + attacker.IP() + "/42000 &")
+      attacker_friend.cmd("echo -n 'Hello, Shrew!' > /dev/udp/" + \
+                          attacker.IP() + "/42000 &")
 
-      proc = client.popen("curl -o /dev/null -s -w %{time_total} " + server.IP() + "/webserver/index.html", shell=True)
+      proc = client.popen("curl -o /dev/null -s -w %{time_total} " + \
+                          server.IP() + "/webserver/index.html", shell=True)
       (stdoutdata, stderrdata) = proc.communicate()
       print "Burst period: %d   Time: %s" % (burst_period, stdoutdata)
 
