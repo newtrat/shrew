@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 
-BURST_PARAMS_FILE = "data/burst_params.txt"
-THROUGHPUT_FILE = "data/throughput.txt"
-OUTPUT_FILE = "data/figure_4.png"
+BURST_PARAMS_FILE = "data/current/burst_params.txt"
+THROUGHPUT_FILE = "data/current/throughput.txt"
+OUTPUT_FILE = "data/current/figure_4.png"
 
 periods = []
 throughputs = []

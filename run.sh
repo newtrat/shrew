@@ -3,8 +3,8 @@
 INDEX_SIZE_MEGABITS=15
 INDEX_SIZE_KILOBYTES=$((INDEX_SIZE_MEGABITS*128))
 
-BURST_PARAM_FILE="data/burst_params.txt"
-THROUGHPUT_FILE="data/throughput.txt"
+BURST_PARAM_FILE="data/current/burst_params.txt"
+THROUGHPUT_FILE="data/current/throughput.txt"
 if [ -f $BURST_PARAM_FILE ]
 then
   rm $BURST_PARAM_FILE
@@ -15,7 +15,7 @@ then
 fi
 
 MIN_BURST_PERIOD=500 #in ms
-MAX_BURST_PERIOD=2000
+MAX_BURST_PERIOD=500
 BURST_PERIOD_INCREMENT=50
 
 # Step -2: Install dependencies
@@ -23,9 +23,10 @@ BURST_PERIOD_INCREMENT=50
 # apt-get update
 # apt-get install ......
 
-# Step -1: Compile
+# Step -1: Compile, add files
 # echo 'Compiling...'
 make
+mkdir -p data/current
 
 # Step 0: chmod all the things
 chmod 775 ./attacker
@@ -57,12 +58,12 @@ do
                                    --uplink-queue-args='bytes=22500' \
                                    --downlink-queue=droptail \
                                    --downlink-queue-args='bytes=22500' \
-                                   --meter-downlink \
-                                   --meter-downlink-delay \
                                    -- \
     <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
   kill -9 $attacker_pid
 done
 
-# Step 3: Graph output
+# Step 3: Graph output, save in timestamped form
 python ./figure_4.py
+timestamp=$(date +%Y-%m-%d:%k:%M:%S)
+cp -r data/current data/$timestamp
