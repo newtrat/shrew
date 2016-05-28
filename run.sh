@@ -15,7 +15,7 @@ then
 fi
 
 MIN_BURST_PERIOD=500 #in ms
-MAX_BURST_PERIOD=600
+MAX_BURST_PERIOD=2000
 BURST_PERIOD_INCREMENT=50
 
 # Step -2: Install dependencies
@@ -63,3 +63,6 @@ do
     <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
   kill -9 $attacker_pid
 done
+
+# Step 3: Graph output
+python ./figure_4.py
