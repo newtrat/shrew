@@ -13,10 +13,17 @@ if [ -f $THROUGHPUT_FILE ]
 then
   rm $THROUGHPUT_FILE
 fi
+touch $BURST_PARAM_FILE
+touch $THROUGHPUT_FILE
 
 MIN_BURST_PERIOD=500 #in ms
 MAX_BURST_PERIOD=500
 BURST_PERIOD_INCREMENT=50
+
+username="ubuntu"
+if id "cs244" >/dev/null 2>&1; then
+  username="cs244"
+fi
 
 # Step -2: Install dependencies
 # echo 'Installing dependencies...'
@@ -33,6 +40,8 @@ chmod 775 ./attacker
 chmod 775 ./client_and_friend.sh
 chmod 775 ./client.sh
 chmod 775 ./make_long_index.sh
+chmod 666 $BURST_PARAM_FILE
+chmod 666 $THROUGHPUT_FILE
 # etc.
 
 # Step 1: Set up server
@@ -53,12 +62,12 @@ do
   attacker_pid=$!
 
   ./change_rto.sh &
-  sudo -u cs244 mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
-                                   --uplink-queue=droptail \
-                                   --uplink-queue-args='bytes=22500' \
-                                   --downlink-queue=droptail \
-                                   --downlink-queue-args='bytes=22500' \
-                                   -- \
+  sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
+                                       --uplink-queue=droptail \
+                                       --uplink-queue-args='bytes=22500' \
+                                       --downlink-queue=droptail \
+                                       --downlink-queue-args='bytes=22500' \
+                                       -- \
     <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
   kill -9 $attacker_pid
 done
