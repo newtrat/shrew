@@ -20,7 +20,9 @@ import math
 class ShrewTopo(Topo):
   "Simple topology for bufferbloat experiment."
 
-  def build(self):
+  def __init__(self):
+    Topo.__init__(self)
+
     attacker = self.addHost('attacker')
     server = self.addHost('server')
     client = self.addHost('client')
@@ -37,7 +39,6 @@ class ShrewTopo(Topo):
 
     # Bottleneck link
     self.addLink(server_switch, client_switch, bw=1.5, delay='2ms', max_queue_size=15)
-    return
 
 def main():
   os.system("mn -c")
