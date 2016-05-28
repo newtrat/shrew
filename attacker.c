@@ -71,7 +71,7 @@ void perform_attack(int period, int length, struct sockaddr_in friend_addr,
 	printf("Performing attack with period %dms, length %dms, rate %dKbps, and packets in bursts of size %d.\n", period, length, link_rate, numpackets_burst);
 	double avg_throughput = ((double) length) / period * link_rate / 1000.0;
 	printf("Average throughput used: %fMbps\n", avg_throughput);
-	double impact = link_rate / 1000.0 * (link_rate / 1000.0 - avg_throughput);
+	double impact = link_rate / 1000.0 / (link_rate / 1000.0 - avg_throughput);
 	printf("Expected time increase just due to throughput use: %f\n", impact);
 	int friend_sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	
@@ -102,8 +102,8 @@ void perform_attack(int period, int length, struct sockaddr_in friend_addr,
 		}
 
 		struct timespec sleeptime;
-		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = (period - length) * 1000L * 1000;
+		sleeptime.tv_sec = (period - length) / 1000;
+		sleeptime.tv_nsec = ((period - length) % 1000) * 1000L * 1000;
 		int result = nanosleep(&sleeptime, NULL);
 	}
 
