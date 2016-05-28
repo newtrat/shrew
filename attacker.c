@@ -102,8 +102,8 @@ void perform_attack(int period, int length, struct sockaddr_in friend_addr,
 		}
 
 		struct timespec sleeptime;
-		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = (period - length) * 1000L * 1000;
+		sleeptime.tv_sec = (period - length) / 1000;
+		sleeptime.tv_nsec = ((period - length) % 1000) * 1000L * 1000;
 		int result = nanosleep(&sleeptime, NULL);
 	}
 
