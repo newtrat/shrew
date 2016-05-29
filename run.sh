@@ -1,22 +1,41 @@
 #!/bin/bash
 
+# Starter stuff
+add-apt-repository ppa:keithw/mahimahi
+apt-get update
+apt-get install mahimahi mininet gcc make apache2 python-matplotlib
+
+make
+
+sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.ipv4.tcp_congestion_control=reno
+
+mkdir data
+mkdir data/current
+
+chmod 776 *.sh
+chmod 776 *.py
+
 # Mininet version:
 #
-#DATA_DIR=data/current
-#BURST_OUTFILE=$DATA_DIR/burst_params.txt
-#THROUGHPUT_OUTFILE=$DATA_DIR/throughput.txt
+DATA_DIR=data/current
+BURST_OUTFILE=$DATA_DIR/burst_params.txt
+THROUGHPUT_OUTFILE=$DATA_DIR/throughput.txt
+
+chmod 666 $DATA_DIR
+
 #
 ##First graph is the general graph of the entire range, small file
-#python mininet_test.py --min-period=200 --max-period=3000 --period-step=50 \
-#                       --min-length=150 --max-length=150  --length-step=50 \
-#                       --trials=5 --file-size-megabits=8 \
-#                       --burst-outfile=$BURST_OUTFILE \
-#                       --throughput-outfile=$THROUGHPUT_OUTFILE
-#timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+python mininet_test.py --min-period=500 --max-period=1500 --period-step=100 \
+                       --min-length=150 --max-length=150  --length-step=50 \
+                       --trials=3 --file-size-megabits=40 \
+                       --burst-outfile=$BURST_OUTFILE \
+                       --throughput-outfile=$THROUGHPUT_OUTFILE
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
 #
-#python figure_4.py --plot-name="Small File 5 Trials"
+python figure_4.py --plot-name="Small File 5 Trials"
 #
-#cp -r $DATA_DIR data/$timestamp
+cp -r $DATA_DIR data/$timestamp
 #
 ##Second graph is the zoomed graph for a small file
 #python mininet_test.py --min-period=1000 --max-period=1500 --period-step=50 \
