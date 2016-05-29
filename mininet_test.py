@@ -85,7 +85,7 @@ def parse_args():
   return parser.parse_args()
 
 def main(args):
-  os.system("sudo ./make_large_index.sh %d" % (args.file_size_megabits * 128))
+  os.system("sudo ./make_long_index.sh %d" % (args.file_size_megabits * 128))
   os.system("cp /var/www/html/index.html webserver/index.html")
   os.system("mn -c")
   with open(args.burst_outfile, "w") as burst_outfile:
