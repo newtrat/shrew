@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Starter stuff
+add-apt-repository ppa:keithw/mahimahi
+apt-get update
+apt-get install mahimahi mininet gcc make apache2 python-matplotlib
+
+make
+
+sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.ipv4.tcp_congestion_control=reno
+
 # Mininet version:
 #
 #DATA_DIR=data/current
