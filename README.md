@@ -1,16 +1,14 @@
 Launch an Amazon EC2 Ubuntu instance using the instructions from PA2 (on Piazza).  Make sure the username is 'ubuntu' (the default).
 In a terminal, run
-sudo apt-get update
-sudo apt-get install git
-git clone https://github.com/newtrat/shrew.git
-cd shrew
-chmod 776 run.sh
-sudo ./run.sh [Hit Enter and y when prompted near the start of the script.]
+1. sudo apt-get update
+2. sudo apt-get install git
+3. git clone https://github.com/newtrat/shrew.git
+4. cd shrew
+5. chmod 776 run.sh
+6. sudo ./run.sh [Hit Enter and y when prompted near the start of the script.]
 Note that this script will take a very long time (potentially up to 12 hours) to run.
 
-If you don’t want to leave your ssh session running for that long, feel free to detach the
-
-run script:
+If you don’t want to leave your ssh session running for that long, feel free to detach the run script:
 
 tmux
 sudo ./run.sh
