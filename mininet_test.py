@@ -85,7 +85,7 @@ def parse_args():
   return parser.parse_args()
 
 def main(args):
-  os.system("sudo ./make_large_index.sh %d" % (args.file_size_megabits * 128))
+  os.system("sudo ./make_long_index.sh %d" % (args.file_size_megabits * 128))
   os.system("cp /var/www/html/index.html webserver/index.html")
   os.system("mn -c")
   with open(args.burst_outfile, "w") as burst_outfile:
@@ -126,7 +126,9 @@ def main(args):
                                 shell=True)
             (stdoutdata, stderrdata) = proc.communicate()
             burst_outfile.write("%d %d\n" % (burst_period, burst_length))
-            throughput_outfile.write("%f\n" % (float(args.file_size_megabits) / float(stdoutdata)))
+            throughput = float(args.file_size_megabits) / float(stdoutdata)
+            throughput_outfile.write("%f\n" % (throughput))
+            print("Burst Period: %d, Throughput: %f\n" % (burst_period, throughput))
 
             net.stop()
             # Ensure that all processes you create within Mininet are killed.
