@@ -40,52 +40,98 @@ class ShrewTopo(Topo):
     # Bottleneck link
     self.addLink(server_switch, client_switch, bw=1.5, delay='2ms', max_queue_size=15)
 
-def main():
-  burst_params_file = open("data/current/burst_params.txt", 'w')
-  throughput_file = open("data/current/throughput.txt", 'w')
+def parse_args():
+  parser = ArgumentParser(description="Shrew test on Mininet")
+  parser.add_argument('--min-period', \
+                      type=int, \
+                      help="Minimum burst period (ms)", \
+                      default=500)
+  parser.add_argument('--max-period', \
+                      type=int, \
+                      help="Maximum burst period (ms)", \
+                      default=1500)
+  parser.add_argument('--period-step', \
+                      type=int, \
+                      help="Increment step for burst period (ms)", \
+                      default=50)
+  parser.add_argument('--min-length', \
+                      type=int, \
+                      help="Minimum burst length (ms)", \
+                      default=150)
+  parser.add_argument('--max-length', \
+                      type=int, \
+                      help="Maximum burst length (ms)", \
+                      default=150)
+  parser.add_argument('--length-step', \
+                      type=int, \
+                      help="Increment step for burst length (ms)", \
+                      default=50)
+  parser.add_argument('--trials', \
+                      type=int, \
+                      help="Number of trials for each (period, length) pair", \
+                      default=5)
+  parser.add_argument('--file-size-megabits', \
+                      type=int, \
+                      help="File size for curl download in megaBITS", \
+                      default=8)
+  parser.add_argument('--burst-outfile', \
+                      type=str, \
+                      help="Output file for burst parameters", \
+                      default="data/current/burst_params.txt")
+  parser.add_argument('--throughput-outfile', \
+                      type=str, \
+                      help="Output file for throughput", \
+                      default="data/current/throughput.txt")
+  return parser.parse_args()
 
-  burst_periods = [200 + 50 * i for i in range(56) for j in range(5)]
+def main(args):
+  os.system("sudo ./make_large_index.sh %d" % (args.file_size_megabits * 128))
+  os.system("cp /var/www/html/index.html webserver/index.html")
   os.system("mn -c")
-  for burst_period in burst_periods:
-    for burst_length in [150]:
-      topo = ShrewTopo()
-      net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, \
-                    controller=OVSController)
-      net.start()
+  with open(args.burst_outfile, "w") as burst_outfile:
+    with open(args.throughput_outfile, "w") as throughput_outfile:
+      for burst_period in range(args.min_period, args.max_period + 1, \
+                                args.period_step):
+        for burst_length in range(args.min_length, args.max_length + 1, \
+                                  args.length_step):
+          for trial in range(args.trials):
+            topo = ShrewTopo()
+            net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, \
+                          controller=OVSController)
+            net.start()
 
-      # Start up server
-      client = net.get("client")
-      server = net.get("server")
-      server.cmd("python webserver/webserver.py &")
-      # Change TCP RTO on server.
-      server.cmd("ip route > /tmp/ip_routes.txt")
-      with open("/tmp/ip_routes.txt") as f:
-        for line in f:
-          server.cmd("ip route change %s rto_min 1000" % (line.strip()))
-      server.cmd("ip route flush cache")
-      sleep(1)
+            # Start up server
+            client = net.get("client")
+            server = net.get("server")
+            server.cmd("python webserver/webserver.py &")
+            # Change TCP RTO on server.
+            server.cmd("ip route > /tmp/ip_routes.txt")
+            with open("/tmp/ip_routes.txt") as f:
+              for line in f:
+                server.cmd("ip route change %s rto_min 1000" % (line.strip()))
+            server.cmd("ip route flush cache")
+            sleep(1)
 
-      # Start up attacker
-      attacker = net.get("attacker")
-      attacker_friend = net.get("friend")
-      attacker.cmd("./attacker %d %d &" % (burst_period, burst_length))
-      sleep(1)
-      attacker_friend.cmd("echo -n 'Hello, Shrew!' > /dev/udp/" + \
-                          attacker.IP() + "/42000 &")
+            # Start up attacker
+            attacker = net.get("attacker")
+            attacker_friend = net.get("friend")
+            attacker.cmd("./attacker %d %d &" % (burst_period, burst_length))
+            sleep(1)
+            attacker_friend.cmd("echo -n 'Hello, Shrew!' > /dev/udp/" + \
+                                attacker.IP() + "/42000 &")
 
-      proc = client.popen("curl -o /dev/null -s -w %{time_total} " + \
-                          server.IP() + "/webserver/index.html", shell=True)
-      (stdoutdata, stderrdata) = proc.communicate()
-      print "Burst period: %d   Time: %s" % (burst_period, stdoutdata)
-      burst_params_file.write(str(burst_period) + " " + str(burst_length) + "\n")
-      # TODO:  update computation for different file sizes
-      throughput_file.write(str(8.0 / float(stdoutdata)) + "\n")
-      net.stop()
-      # Ensure that all processes you create within Mininet are killed.
-      # Sometimes they require manual killing.
-      Popen("pgrep -f webserver.py | xargs kill -9", shell=True).wait()
 
-  burst_params_file.close()
-  throughput_file.close()
+            proc = client.popen("curl -o /dev/null -s -w %{time_total} " + \
+                                server.IP() + "/webserver/index.html", \
+                                shell=True)
+            (stdoutdata, stderrdata) = proc.communicate()
+            burst_outfile.write("%d %d\n" % (burst_period, burst_length))
+            throughput_outfile.write("%f\n" % (float(args.file_size_megabits) / float(stdoutdata)))
+
+            net.stop()
+            # Ensure that all processes you create within Mininet are killed.
+            # Sometimes they require manual killing.
+            Popen("pgrep -f webserver.py | xargs kill -9", shell=True).wait()
+
 if __name__ == "__main__":
-  main()
+  main(parse_args())
