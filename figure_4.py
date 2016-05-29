@@ -43,7 +43,10 @@ yerror = []
 for period, value in sorted(aggregate_data.iteritems()):
 	xaxis.append(period)
 	yaxis.append(numpy.average(aggregate_data[period]))
-	yerror.append(numpy.std(aggregate_data[period], ddof=1) / numpy.sqrt(len(aggregate_data[period])))
+	if len(aggregate_data[period]) <= 1:
+		yerror.append(0)
+	else:	
+		yerror.append(numpy.std(aggregate_data[period], ddof=1) / numpy.sqrt(len(aggregate_data[period])))
 
 #plt.figure()
 plt.errorbar(xaxis, yaxis, yerr=yerror, fmt='o')
