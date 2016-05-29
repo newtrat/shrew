@@ -128,7 +128,7 @@ def main(args):
             burst_outfile.write("%d %d\n" % (burst_period, burst_length))
             throughput = float(args.file_size_megabits) / float(stdoutdata)
             throughput_outfile.write("%f\n" % (throughput))
-            print("Burst Period: %d, Throughput: %f\n" % (burst_period, throughput))
+            print("Burst Period: %d, Throughput: %f" % (burst_period, throughput))
 
             net.stop()
             # Ensure that all processes you create within Mininet are killed.
