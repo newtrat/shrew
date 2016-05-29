@@ -44,8 +44,9 @@ def main():
   burst_params_file = open("data/current/burst_params.txt", 'w')
   throughput_file = open("data/current/throughput.txt", 'w')
 
+  burst_periods = [200 + 50 * i for i in range(56) for j in range(5)]
   os.system("mn -c")
-  for burst_period in [500, 500, 500, 600, 600, 600, 700, 700, 700, 800, 800, 800, 900, 900, 900, 1000, 1000, 1000, 1100, 1100, 1200, 1200, 1200, 1100, 1300, 1300, 1300, 1400, 1400, 1400, 1500, 1500, 1500, 1600, 1600, 1600, 1700, 1700, 1700, 1800, 1800, 1800, 1900, 1900, 1900, 2000, 2000, 2000]:
+  for burst_period in burst_periods:
     for burst_length in [150]:
       topo = ShrewTopo()
       net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, \
