@@ -86,31 +86,76 @@ chmod 666 $THROUGHPUT_FILE
 
 # Step 2: (Repeatedly) attack!!!
 burst_length=150
+#for ((burst_period=$MIN_BURST_PERIOD; burst_period<=$MAX_BURST_PERIOD; \
+#      burst_period+=$BURST_PERIOD_INCREMENT))
+#do
+#  for ((trials=0; trials<5; trials+=1))
+#  do
+#
+#    echo "Burst period: $burst_period ms   Burst length: $burst_length ms"
+#    echo "$burst_period $burst_length" >> $BURST_PARAM_FILE
+#
+#    ./attacker $burst_period $burst_length &
+#    attacker_pid=$!
+#
+#    ./change_rto.sh &
+#    sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
+#                                         --uplink-queue=droptail \
+#                                         --uplink-queue-args='packets=15' \
+#                                         --downlink-queue=droptail \
+#                                         --downlink-queue-args='packets=15' \
+#                                         -- \
+#      <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
+#    kill -9 $attacker_pid
+#  done
+#done
+#
+## Step 3: Graph output, save in timestamped form
+#python ./figure_4.py --plot-name="Mahimahi Small File 5 Trials"
+#timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+#cp -r data/current data/$timestamp
+
+
+
+# Large file attack
+
+INDEX_SIZE_MEGABITS=40
+INDEX_SIZE_KILOBYTES=$((INDEX_SIZE_MEGABITS*128))
+
+MIN_BURST_PERIOD=500 #in ms
+MAX_BURST_PERIOD=1500
+BURST_PERIOD_INCREMENT=100
+
+./make_long_index.sh $INDEX_SIZE_KILOBYTES
 for ((burst_period=$MIN_BURST_PERIOD; burst_period<=$MAX_BURST_PERIOD; \
       burst_period+=$BURST_PERIOD_INCREMENT))
 do
-  for ((trials=0; trials<5; trials+=1))
-  do
 
-    echo "Burst period: $burst_period ms   Burst length: $burst_length ms"
-    echo "$burst_period $burst_length" >> $BURST_PARAM_FILE
+for ((trials=0; trials<2; trials+=1)) 
+do
 
-    ./attacker $burst_period $burst_length &
-    attacker_pid=$!
+  echo "Burst period: $burst_period ms   Burst length: $burst_length ms"
+  echo "$burst_period $burst_length" >> $BURST_PARAM_FILE
 
-    ./change_rto.sh &
-    sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
-                                         --uplink-queue=droptail \
-                                         --uplink-queue-args='packets=15' \
-                                         --downlink-queue=droptail \
-                                         --downlink-queue-args='packets=15' \
-                                         -- \
+  ./attacker $burst_period $burst_length &
+  attacker_pid=$!
+
+  ./change_rto.sh &
+  sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
+                                       --uplink-queue=droptail \
+                                       --uplink-queue-args='packets=15' \
+                                       --downlink-queue=droptail \
+                                       --downlink-queue-args='packets=15' \
+                                       -- \
       <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
-    kill -9 $attacker_pid
-  done
+  kill -9 $attacker_pid
+done
 done
 
 # Step 3: Graph output, save in timestamped form
-python ./figure_4.py --plot-name="Mahimahi Small File 5 Trials"
+python ./figure_4.py --plot-name="Mahimahi Large File 2 Trials"
 timestamp=$(date +%Y-%m-%d:%H:%M:%S)
 cp -r data/current data/$timestamp
+
+
+
