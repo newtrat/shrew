@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 BURST_PARAMS_FILE = "data/current/burst_params.txt"
 THROUGHPUT_FILE = "data/current/throughput.txt"
-OUTPUT_FILE = "data/current/figure_4.png"
+OUTPUT_FILE = "data/current/" + args.plot_name.replace(" ", "_") +".png"
 
 periods = []
 throughputs = []
