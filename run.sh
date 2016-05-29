@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Starter stuff
+echo "Installing needed repositories..."
 add-apt-repository ppa:keithw/mahimahi
 apt-get update
 apt-get install mahimahi mininet gcc make apache2 python-matplotlib
@@ -10,49 +11,50 @@ make
 sysctl -w net.ipv4.ip_forward=1
 sysctl -w net.ipv4.tcp_congestion_control=reno
 
-mkdir data
-mkdir data/current
+mkdir -p data/current
 
-chmod 776 *.sh
-chmod 776 *.py
+chmod 777 *.sh
+chmod 777 *.py
+chmod 777 ./attacker
 
 # Mininet version:
-#
 DATA_DIR=data/current
 BURST_OUTFILE=$DATA_DIR/burst_params.txt
 THROUGHPUT_OUTFILE=$DATA_DIR/throughput.txt
 
-chmod 666 $DATA_DIR
-
-#
-##First graph is the general graph of the entire range, small file
-python mininet_test.py --min-period=500 --max-period=1500 --period-step=100 \
+# First graph is the general graph of the entire range, small file
+echo "Small file, 5 trials:"
+python mininet_test.py --min-period=200 --max-period=3000 --period-step=50 \
                        --min-length=150 --max-length=150  --length-step=50 \
-                       --trials=3 --file-size-megabits=40 \
+                       --trials=5 --file-size-megabits=8 \
                        --burst-outfile=$BURST_OUTFILE \
                        --throughput-outfile=$THROUGHPUT_OUTFILE
 timestamp=$(date +%Y-%m-%d:%H:%M:%S)
-#
-python figure_4.py --plot-name="Small File 5 Trials"
-#
-cp -r $DATA_DIR data/$timestamp
-#
-##Second graph is the zoomed graph for a small file
-#python mininet_test.py --min-period=1000 --max-period=1500 --period-step=50 \
-#                       --min-length=150 --max-length=150 --length-step=50 \
-#                       --trials=5 --file-size-megabits=8 \
-#                       --burst-outfile=$BURST_OUTFILE \
-#                       --throughput-outfile=$THROUGHPUT_OUTFILE
-#timestamp=$(date +%Y-%m-%d:%H:%M:%S)
-#
-#python figure_4.py --plot-name="Small File 10 Trial Zoom"
-#
-#cp -r $DATA_DIR data/$timestamp
 
+python figure_4.py --plot-name="Small File 5 Trials"
+
+cp -r $DATA_DIR data/$timestamp
+cp -r $DATA_DIR data/small_file_five_trials
+
+
+# Second graph is the zoomed graph for a small file
+echo "Small file, zoomed in, 10 trials:"
+python mininet_test.py --min-period=1000 --max-period=1500 --period-step=50 \
+                       --min-length=150 --max-length=150 --length-step=50 \
+                       --trials=10 --file-size-megabits=8 \
+                       --burst-outfile=$BURST_OUTFILE \
+                       --throughput-outfile=$THROUGHPUT_OUTFILE
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+
+python figure_4.py --plot-name="Small File 10 Trial Zoom"
+
+cp -r $DATA_DIR data/$timestamp
+cp -r $DATA_DIR data/small_file_ten_trial_zoom
 
 # Mahimahi version:
 
 # Parameters:
+echo "Mahimahi version"
 INDEX_SIZE_MEGABITS=8
 INDEX_SIZE_KILOBYTES=$((INDEX_SIZE_MEGABITS*128))
 
@@ -68,6 +70,8 @@ then
 fi
 touch $BURST_PARAM_FILE
 touch $THROUGHPUT_FILE
+chmod 666 $BURST_PARAM_FILE
+chmod 666 $THROUGHPUT_FILE
 
 MIN_BURST_PERIOD=500 #in ms
 MAX_BURST_PERIOD=1500
@@ -78,30 +82,10 @@ if id "cs244" >/dev/null 2>&1; then
   username="cs244"
 fi
 
-# Step -2: Install dependencies
-# echo 'Installing dependencies...'
-# apt-get update
-# apt-get install ......
-
-# Step -1: Compile, add files
-# echo 'Compiling...'
-make
-mkdir -p data/current
-
-# Step 0: chmod all the things
-chmod 775 ./attacker
-chmod 775 ./client_and_friend.sh
-chmod 775 ./client.sh
-chmod 775 ./make_long_index.sh
-chmod 666 $BURST_PARAM_FILE
-chmod 666 $THROUGHPUT_FILE
-# etc.
-
 # Step 1: Set up server
-# echo 'Starting server...'
-# service start apache2
+echo 'Starting server...'
 ./make_long_index.sh $INDEX_SIZE_KILOBYTES
-# echo 'Starting attacker...'
+echo 'Starting attacker...'
 
 # Step 2: (Repeatedly) attack!!!
 burst_length=150
