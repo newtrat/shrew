@@ -35,6 +35,7 @@ python figure_4.py --plot-name="Small File 5 Trials"
 
 cp -r $DATA_DIR data/$timestamp
 cp -r $DATA_DIR data/small_file_five_trials
+rm -f $DATA_DIR/*
 
 
 # Second graph is the zoomed graph for a small file
@@ -50,6 +51,7 @@ python figure_4.py --plot-name="Small File 10 Trial Zoom"
 
 cp -r $DATA_DIR data/$timestamp
 cp -r $DATA_DIR data/small_file_ten_trial_zoom
+rm -f $DATA_DIR/*
 
 # Mahimahi version:
 
@@ -89,35 +91,36 @@ echo 'Starting attacker...'
 
 # Step 2: (Repeatedly) attack!!!
 burst_length=150
-#for ((burst_period=$MIN_BURST_PERIOD; burst_period<=$MAX_BURST_PERIOD; \
-#      burst_period+=$BURST_PERIOD_INCREMENT))
-#do
-#  for ((trials=0; trials<5; trials+=1))
-#  do
-#
-#    echo "Burst period: $burst_period ms   Burst length: $burst_length ms"
-#    echo "$burst_period $burst_length" >> $BURST_PARAM_FILE
-#
-#    ./attacker $burst_period $burst_length &
-#    attacker_pid=$!
-#
-#    ./change_rto.sh &
-#    sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
-#                                         --uplink-queue=droptail \
-#                                         --uplink-queue-args='packets=15' \
-#                                         --downlink-queue=droptail \
-#                                         --downlink-queue-args='packets=15' \
-#                                         -- \
-#      <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
-#    kill -9 $attacker_pid
-#  done
-#done
-#
-## Step 3: Graph output, save in timestamped form
-#python ./figure_4.py --plot-name="Mahimahi Small File 5 Trials"
-#timestamp=$(date +%Y-%m-%d:%H:%M:%S)
-#cp -r data/current data/$timestamp
+for ((burst_period=$MIN_BURST_PERIOD; burst_period<=$MAX_BURST_PERIOD; \
+     burst_period+=$BURST_PERIOD_INCREMENT))
+do
+  for ((trials=0; trials<5; trials+=1))
+  do
 
+    echo "Burst period: $burst_period ms   Burst length: $burst_length ms"
+    echo "$burst_period $burst_length" >> $BURST_PARAM_FILE
+
+    ./attacker $burst_period $burst_length &
+    attacker_pid=$!
+
+    ./change_rto.sh &
+    sudo -u $username mm-delay 6 mm-link onePointFive.trace onePointFive.trace \
+                                        --uplink-queue=droptail \
+                                        --uplink-queue-args='packets=15' \
+                                        --downlink-queue=droptail \
+                                        --downlink-queue-args='packets=15' \
+                                        -- \
+      <<< ". client_and_friend.sh $INDEX_SIZE_MEGABITS $THROUGHPUT_FILE"
+    kill -9 $attacker_pid
+  done
+done
+
+# Step 3: Graph output, save in timestamped form
+python ./figure_4.py --plot-name="Mahimahi Small File 5 Trials"
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+cp -r data/current data/$timestamp
+cp -r data/current data/mahimahi_small_file_five_trials
+rm -f $DATA_DIR/*
 
 
 # Large file attack
@@ -159,6 +162,6 @@ done
 python ./figure_4.py --plot-name="Mahimahi Large File 2 Trials"
 timestamp=$(date +%Y-%m-%d:%H:%M:%S)
 cp -r data/current data/$timestamp
-
-
+cp -r data/current data/mahimahi_large_file_two_trials
+rm -f $DATA_DIR/*
 
