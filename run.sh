@@ -16,6 +16,7 @@ mkdir -p data/current
 chmod 777 *.sh
 chmod 777 *.py
 chmod 777 ./attacker
+chmod 777 -R data
 
 # Mininet version:
 DATA_DIR=data/current
@@ -51,6 +52,34 @@ python figure_4.py --plot-name="Small File 10 Trial Zoom"
 
 cp -r $DATA_DIR data/$timestamp
 cp -r $DATA_DIR data/small_file_ten_trial_zoom
+rm -f $DATA_DIR/*
+
+echo "Large file, 3 trials:"
+python mininet_test.py --min-period=500 --max-period=1500 --period-step=100 \
+                       --min-length=150 --max-length=150 --length-step=50 \
+                       --trials=3 --file-size-megabits=40 \
+                       --burst-outfile=$BURST_OUTFILE \
+                       --throughput-outfile=$THROUGHPUT_OUTFILE
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+
+python figure_4.py --plot-name="Large File 3 Trials"
+
+cp -r $DATA_DIR data/$timestamp
+cp -r $DATA_DIR data/large_file_three_trials
+rm -f $DATA_DIR/*
+
+echo "Large file, zoomed in, 10 trials:"
+python mininet_test.py --min-period=1000 --max-period=1500 --period-step=50 \
+                       --min-length=150 --max-length=150 --length-step=50 \
+                       --trials=10 --file-size-megabits=40 \
+                       --burst-outfile=$BURST_OUTFILE \
+                       --throughput-outfile=$THROUGHPUT_OUTFILE
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
+
+python figure_4.py --plot-name="Large File 10 Trial Zoom"
+
+cp -r $DATA_DIR data/$timestamp
+cp -r $DATA_DIR data/large_file_ten_trial_zoom
 rm -f $DATA_DIR/*
 
 # Mahimahi version:
@@ -124,6 +153,19 @@ rm -f $DATA_DIR/*
 
 
 # Large file attack
+
+if [ -f $BURST_PARAM_FILE ]
+then
+  rm $BURST_PARAM_FILE
+fi
+if [ -f $THROUGHPUT_FILE ]
+then
+  rm $THROUGHPUT_FILE
+fi
+touch $BURST_PARAM_FILE
+touch $THROUGHPUT_FILE
+chmod 666 $BURST_PARAM_FILE
+chmod 666 $THROUGHPUT_FILE
 
 INDEX_SIZE_MEGABITS=40
 INDEX_SIZE_KILOBYTES=$((INDEX_SIZE_MEGABITS*128))
