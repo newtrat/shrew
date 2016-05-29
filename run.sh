@@ -10,7 +10,7 @@ python mininet_test.py --min-period=500 --max-period=500 --period-step=50 \
                        --trials=5 --file-size-megabits=8 \
                        --burst-outfile=$BURST_OUTFILE \
                        --throughput-outfile=$THROUGHPUT_OUTFILE
-timestamp=$(date +%Y-%m-%d:%k:%M:%S)
+timestamp=$(date +%Y-%m-%d:%H:%M:%S)
 
 python figure_4.py
 
@@ -94,5 +94,5 @@ cp -r $DATA_DIR data/$timestamp
 
 # # Step 3: Graph output, save in timestamped form
 # python ./figure_4.py
-# timestamp=$(date +%Y-%m-%d:%k:%M:%S)
+# timestamp=$(date +%Y-%m-%d:%H:%M:%S)
 # cp -r data/current data/$timestamp
