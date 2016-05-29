@@ -21,6 +21,9 @@ chmod 776 *.py
 DATA_DIR=data/current
 BURST_OUTFILE=$DATA_DIR/burst_params.txt
 THROUGHPUT_OUTFILE=$DATA_DIR/throughput.txt
+
+chmod 666 $DATA_DIR
+
 #
 ##First graph is the general graph of the entire range, small file
 python mininet_test.py --min-period=500 --max-period=1500 --period-step=100 \
